@@ -1,21 +1,18 @@
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 
-const DarkModeToggle: React.FC<{ className?: string }> = ({ className = '' }) => {
+const DarkModeToggle: React.FC = () => {
   const { theme, toggle } = useTheme();
+
   return (
     <button
-      aria-label="Toggle dark mode"
-      title="Toggle dark mode"
       onClick={toggle}
-      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded border text-sm transition-colors
-        bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50
-        dark:bg-neutral-800 dark:text-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-700 ${className}`}
+      className="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant dark:text-dark-on-surface-variant hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high border border-outline-variant dark:border-dark-outline-variant transition-colors"
+      aria-label="Toggle dark mode"
     >
-      <span className="w-4 h-4 inline-block">
-        {theme === 'dark' ? '☀️' : '🌙'}
+      <span className="material-symbols-outlined text-[20px]">
+        {theme === 'dark' ? 'light_mode' : 'dark_mode'}
       </span>
-      <span className="hidden sm:inline">{theme === 'dark' ? 'Light' : 'Dark'}</span>
     </button>
   );
 };

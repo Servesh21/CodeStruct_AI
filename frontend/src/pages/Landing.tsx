@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
-import DarkModeToggle from '../components/DarkModeToggle';
-import SimpleBentoGrid from '../components/SimpleBentoGrid';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import CodeStructLogo from '../components/CodeStructLogo';
 
 const Landing: React.FC = () => {
   const [me, setMe] = useState<{ authenticated: boolean; user?: any } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const { theme, toggle } = useTheme();
 
   const startLogin = () => {
     const apiBaseURL = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -29,13 +32,10 @@ const Landing: React.FC = () => {
 
   if (!me && !error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950">
+      <div className="min-h-screen flex items-center justify-center bg-background dark:bg-dark-surface-container-lowest">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-neutral-600 dark:text-neutral-400 text-lg">Loading your session...</span>
-          <p className="text-neutral-500 dark:text-neutral-500 text-sm max-w-md text-center">
-            Please wait while we verify your authentication status
-          </p>
+          <div className="w-10 h-10 border-[3px] border-primary-container dark:border-dark-primary-container border-t-transparent rounded-full animate-spin" />
+          <span className="font-sans text-body-md text-on-surface-variant dark:text-dark-on-surface-variant">Loading your session...</span>
         </div>
       </div>
     );
@@ -43,190 +43,214 @@ const Landing: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950">
+      <div className="min-h-screen flex items-center justify-center bg-background dark:bg-dark-surface-container-lowest">
         <div className="flex flex-col items-center space-y-4 max-w-md text-center">
-          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-            <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
+          <div className="w-14 h-14 bg-error-container dark:bg-dark-error-container rounded-full flex items-center justify-center">
+            <span className="material-symbols-outlined text-on-error-container dark:text-dark-on-error-container text-[28px]">warning</span>
           </div>
-          <div>
-            <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-              Connection Error
-            </h2>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-              {error}
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
+          <h2 className="font-heading text-headline-md text-on-surface dark:text-dark-on-surface">Connection Error</h2>
+          <p className="font-sans text-body-md text-on-surface-variant dark:text-dark-on-surface-variant">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-primary-container dark:bg-dark-primary-container text-on-primary dark:text-dark-surface-container-lowest font-mono text-label-md px-md py-sm rounded hover:opacity-90 transition-opacity"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
   }
 
-  // At this point, me is guaranteed to be non-null
   if (!me) return null;
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center group-hover:bg-primary-700 transition-colors">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                </svg>
-              </div>
-              <span className="text-xl font-bold text-neutral-900 dark:text-neutral-100">
-                CodeStruct
-              </span>
+    <div className="min-h-screen bg-background dark:bg-dark-surface-container-lowest font-sans antialiased flex flex-col">
+      {/* ─── Top Navigation ─── */}
+      <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-lg h-16 bg-surface dark:bg-dark-surface-container-low border-b border-outline-variant dark:border-dark-outline-variant">
+        <div className="flex items-center gap-6">
+          <Link to="/">
+            <CodeStructLogo size="sm" />
+          </Link>
+        </div>
+        <div className="hidden md:flex items-center gap-6">
+          <a href="#" className="font-mono text-label-md text-on-surface dark:text-dark-on-surface hover:text-primary dark:hover:text-dark-primary transition-colors duration-200">Docs</a>
+          {me.authenticated ? (
+            <Link
+              to="/dashboard"
+              className="font-mono text-label-md text-on-surface dark:text-dark-on-surface hover:text-primary dark:hover:text-dark-primary transition-colors duration-200"
+            >
+              Dashboard
             </Link>
+          ) : (
+            <a href="#" className="font-mono text-label-md text-on-surface dark:text-dark-on-surface hover:text-primary dark:hover:text-dark-primary transition-colors duration-200">Sign in</a>
+          )}
 
-            {/* Right side */}
-            <div className="flex items-center space-x-4">
-              {me.authenticated ? (
-                <>
+          {/* Dark mode toggle */}
+          <button
+            onClick={toggle}
+            className="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant dark:text-dark-on-surface-variant hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high transition-colors"
+            aria-label="Toggle dark mode"
+          >
+            <span className="material-symbols-outlined text-[20px]">
+              {theme === 'dark' ? 'light_mode' : 'dark_mode'}
+            </span>
+          </button>
 
-                  <Link
-                    to="/dashboard"
-                    className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition-colors"
-                  >
-                    Dashboard
-                  </Link>
-                </>
-              ) : (
-                <Link
-                  to="/dashboard"
-                  className="text-sm font-medium text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100 transition-colors"
-                >
-                  View Demo
-                </Link>
-              )}
-              <DarkModeToggle />
-              <div className="hidden sm:flex items-center space-x-3 px-3 py-2 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
-                <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                  {(me.user?.username || me.user?.email)?.[0]?.toUpperCase()}
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{me.user?.username || 'User'}</span>
-                  {/* <span className="text-xs text-neutral-600 dark:text-neutral-400">Signed in</span> */}
-                </div>
-              </div>
-            </div>
-          </div>
+          {me.authenticated ? (
+            <Link
+              to="/dashboard"
+              className="bg-primary-container dark:bg-dark-primary-container text-on-primary dark:text-dark-surface-container-lowest font-mono text-label-md px-4 py-2 rounded flex items-center gap-2 hover:opacity-90 transition-opacity"
+            >
+              Go to Dashboard
+            </Link>
+          ) : (
+            <button
+              onClick={startLogin}
+              className="bg-primary-container dark:bg-dark-primary-container text-on-primary dark:text-dark-surface-container-lowest font-mono text-label-md px-4 py-2 rounded flex items-center gap-2 hover:opacity-90 transition-opacity"
+            >
+              <svg aria-hidden="true" className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
+              </svg>
+              Connect GitHub
+            </button>
+          )}
         </div>
-      </header>
 
-      {/* Hero Section */}
-      <section className="relative px-6 pt-20 pb-32">
-        <div className="max-w-6xl mx-auto">
-          {/* Badge */}
-          <div className="flex justify-center mb-8 animate-fade-in">
-            <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-primary-50 dark:bg-primary-950/50 border border-primary-200 dark:border-primary-800 text-primary-700 dark:text-primary-300 text-sm font-medium">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
-              </span>
-              <span>AI-Powered Code Analysis</span>
-            </div>
-          </div>
+        {/* Mobile menu */}
+        <button className="md:hidden text-on-surface dark:text-dark-on-surface">
+          <span className="material-symbols-outlined">menu</span>
+        </button>
+      </nav>
 
-          {/* Main Heading */}
-          <div className="text-center mb-12 animate-slide-up">
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-              <span className="text-neutral-900 dark:text-neutral-100">
-                Elevate Your
-              </span>
-              <br />
-              <span className="text-primary-600 dark:text-primary-500">
-                Code Quality
-              </span>
+      {/* ─── Main Content ─── */}
+      <main className="flex-grow pt-24 pb-16 flex flex-col items-center w-full hero-pattern">
+        {/* Hero Section */}
+        <div className="max-w-content w-full px-lg mx-auto grid md:grid-cols-2 gap-12 items-center mb-24">
+          {/* Hero Text */}
+          <div className="flex flex-col gap-6 animate-slide-up">
+            <span className="font-mono text-label-md text-primary dark:text-dark-primary tracking-widest uppercase">AI Code Review & Auto-Fix</span>
+            <h1 className="font-heading text-display-lg text-on-surface dark:text-dark-on-surface">
+              Your repo reviewed.<br />Issues found.<br />Fixes ready.
             </h1>
-
-            <p className="text-xl md:text-2xl text-neutral-600 dark:text-neutral-400 mb-10 max-w-3xl mx-auto leading-relaxed">
-              Analyze complexity, detect code smells, and generate intelligent refactoring suggestions with AI-powered insights.
+            <p className="font-sans text-body-lg text-on-surface-variant dark:text-dark-on-surface-variant max-w-md">
+              Connect your GitHub repo and let CodeStruct find bugs, bad patterns, and security issues — then fix them.
             </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              {!me.authenticated ? (
-                <>
-                  <button
-                    onClick={startLogin}
-                    className="group px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-xl hover:scale-105 flex items-center space-x-2"
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                    </svg>
-                    <span>Sign in with GitHub</span>
-                  </button>
-
-                  {/* <Link
-                    to="/dashboard"
-                    className="px-8 py-4 bg-white dark:bg-neutral-900 border-2 border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 font-semibold rounded-xl hover:border-neutral-400 dark:hover:border-neutral-600 transition-all duration-200 hover:scale-105"
-                  >
-                    View Demo
-                  </Link> */}
-                </>
-              ) : (
+            <div className="mt-4">
+              {me.authenticated ? (
                 <Link
                   to="/dashboard"
-                  className="px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-xl hover:scale-105 flex items-center space-x-2"
+                  className="bg-primary-container dark:bg-dark-primary-container text-on-primary dark:text-dark-surface-container-lowest font-mono text-label-md px-6 py-3 rounded flex items-center gap-3 hover:opacity-90 transition-opacity w-fit"
                 >
-                  <span>Go to Dashboard</span>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
+                  Go to Dashboard
+                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                 </Link>
+              ) : (
+                <button
+                  onClick={startLogin}
+                  className="bg-primary-container dark:bg-dark-primary-container text-on-primary dark:text-dark-surface-container-lowest font-mono text-label-md px-6 py-3 rounded flex items-center gap-3 hover:opacity-90 transition-opacity w-fit"
+                >
+                  <svg aria-hidden="true" className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
+                  </svg>
+                  Connect GitHub
+                </button>
               )}
             </div>
+          </div>
 
-            {error && (
-              <div className="mt-8 inline-block bg-danger-50 dark:bg-danger-950/50 border border-danger-200 dark:border-danger-800 text-danger-700 dark:text-danger-300 rounded-xl px-6 py-3 text-sm">
-                {error}
+          {/* Hero Visual — Glass code preview mockup */}
+          <div className="relative w-full h-[400px] flex items-center justify-center animate-fade-in">
+            <div className="glass-panel w-full max-w-lg rounded-xl shadow-overlay p-1 overflow-hidden flex flex-col">
+              {/* Window chrome */}
+              <div className="h-8 border-b border-outline-variant dark:border-dark-outline-variant flex items-center px-3 gap-2 bg-surface-container-lowest dark:bg-dark-surface-container-lowest rounded-t-xl">
+                <div className="w-3 h-3 rounded-full bg-error dark:bg-dark-error"></div>
+                <div className="w-3 h-3 rounded-full bg-surface-variant dark:bg-dark-surface-variant"></div>
+                <div className="w-3 h-3 rounded-full bg-surface-variant dark:bg-dark-surface-variant"></div>
+                <div className="flex-grow flex justify-center">
+                  <span className="font-mono text-code-md text-on-surface-variant dark:text-dark-on-surface-variant">src/auth/service.ts</span>
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-      </section>
 
-      {/* Features Bento Grid */}
-      <section className="relative px-6 pb-32">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">
-              Built for Developers
-            </h2>
-            <p className="text-lg text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
-              Powerful analysis tools that integrate seamlessly into your workflow
-            </p>
-          </div>
+              {/* Code content */}
+              <div className="bg-surface-container-lowest dark:bg-dark-surface-container-lowest flex-grow p-4 font-mono text-code-md flex flex-col gap-3">
+                {/* Issue 1 — Critical */}
+                <div className="flex items-start gap-3 border border-outline-variant dark:border-dark-outline-variant p-3 rounded">
+                  <span className="material-symbols-outlined text-error dark:text-dark-error text-[16px] mt-1">warning</span>
+                  <div className="flex-grow">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-on-surface dark:text-dark-on-surface font-semibold text-body-md">SQL Injection Risk</span>
+                      <span className="bg-error-container dark:bg-dark-error-container text-on-error-container dark:text-dark-on-error-container text-[10px] px-2 py-0.5 rounded font-mono">High</span>
+                    </div>
+                    <span className="text-on-surface-variant dark:text-dark-on-surface-variant block text-xs">Unsanitized input in query building.</span>
+                    <div className="mt-2 bg-[#0F1117] text-surface dark:text-dark-on-surface p-2 rounded text-[11px] overflow-hidden whitespace-nowrap">
+                      <span className="text-error dark:text-dark-error">- const query = `SELECT * FROM users WHERE id = {'$'}{'{'}id{'}'}`;</span><br />
+                      <span className="text-primary-fixed-dim dark:text-dark-primary">+ const query = 'SELECT * FROM users WHERE id = $1';</span>
+                    </div>
+                  </div>
+                </div>
 
-          <SimpleBentoGrid />
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="relative border-t border-neutral-200 dark:border-neutral-800 py-12">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="flex items-center space-x-3 mb-4 md:mb-0">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-600 rounded-lg" />
-              <span className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">CodeStruct</span>
+                {/* Issue 2 — Low */}
+                <div className="flex items-start gap-3 border border-outline-variant dark:border-dark-outline-variant p-3 rounded opacity-70">
+                  <span className="material-symbols-outlined text-primary dark:text-dark-primary text-[16px] mt-1">info</span>
+                  <div className="flex-grow">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-on-surface dark:text-dark-on-surface font-semibold text-body-md">Dead Code</span>
+                      <span className="bg-surface-container-high dark:bg-dark-surface-container-high text-on-surface-variant dark:text-dark-on-surface-variant text-[10px] px-2 py-0.5 rounded font-mono">Low</span>
+                    </div>
+                    <span className="text-on-surface-variant dark:text-dark-on-surface-variant block text-xs">Variable 'tempCache' is declared but never read.</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="text-sm text-neutral-600 dark:text-neutral-400">
-              © 2025 CodeStruct. All rights reserved.
+          </div>
+        </div>
+
+        {/* ─── How It Works Strip ─── */}
+        <div className="w-full max-w-content px-lg mx-auto mb-24">
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { icon: 'folder', step: 'Step 1', title: 'Connect GitHub', desc: 'Authorize read access to your repositories securely.' },
+              { icon: 'check_circle', step: 'Step 2', title: 'Select a repo', desc: 'Pick the project you want to scan for vulnerabilities and style issues.' },
+              { icon: 'lock', step: 'Step 3', title: 'Review & fix', desc: 'Review AI-generated suggestions and merge auto-fixes with one click.' },
+            ].map((item) => (
+              <div key={item.step} className="flex flex-col gap-4 items-start p-6 bg-surface dark:bg-dark-surface-container border border-outline-variant dark:border-dark-outline-variant rounded-lg hover:border-primary dark:hover:border-dark-primary transition-colors">
+                <div className="w-10 h-10 rounded bg-primary-container/10 dark:bg-dark-primary-container/10 flex items-center justify-center text-primary dark:text-dark-primary">
+                  <span className="material-symbols-outlined">{item.icon}</span>
+                </div>
+                <div>
+                  <div className="font-mono text-label-md text-primary dark:text-dark-primary mb-1">{item.step}</div>
+                  <h3 className="font-heading text-headline-md text-on-surface dark:text-dark-on-surface mb-2">{item.title}</h3>
+                  <p className="font-sans text-body-md text-on-surface-variant dark:text-dark-on-surface-variant">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ─── Social Proof Strip ─── */}
+        <div className="w-full bg-surface dark:bg-dark-surface-container border-y border-outline-variant dark:border-dark-outline-variant py-12">
+          <div className="max-w-content mx-auto px-lg flex flex-wrap justify-center gap-8 md:gap-16">
+            <div className="text-center">
+              <div className="font-heading text-display-lg text-on-surface dark:text-dark-on-surface">47K+</div>
+              <div className="font-mono text-label-md text-on-surface-variant dark:text-dark-on-surface-variant mt-2 uppercase tracking-wider">Issues Found</div>
+            </div>
+            <div className="hidden md:block w-px h-16 bg-outline-variant dark:bg-dark-outline-variant"></div>
+            <div className="text-center">
+              <div className="font-heading text-display-lg text-primary dark:text-dark-primary">12K+</div>
+              <div className="font-mono text-label-md text-on-surface-variant dark:text-dark-on-surface-variant mt-2 uppercase tracking-wider">Auto-Fixed</div>
+            </div>
+            <div className="hidden md:block w-px h-16 bg-outline-variant dark:bg-dark-outline-variant"></div>
+            <div className="text-center">
+              <div className="font-heading text-display-lg text-on-surface dark:text-dark-on-surface">99%</div>
+              <div className="font-mono text-label-md text-on-surface-variant dark:text-dark-on-surface-variant mt-2 uppercase tracking-wider">Accuracy</div>
             </div>
           </div>
         </div>
+      </main>
+
+      {/* ─── Footer ─── */}
+      <footer className="w-full border-t border-outline-variant dark:border-dark-outline-variant bg-surface dark:bg-dark-surface-container py-6 px-lg flex justify-center items-center">
+        <span className="font-mono text-label-md text-on-surface-variant dark:text-dark-on-surface-variant">Built by Servesh Khade</span>
       </footer>
     </div>
   );

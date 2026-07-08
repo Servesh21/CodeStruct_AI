@@ -1,21 +1,18 @@
-import React, { useEffect } from 'react';
-import DarkModeToggle from '../components/DarkModeToggle';
+import React from 'react';
 
 const LoginSuccess: React.FC = () => {
-  useEffect(() => {
-    // Authentication is already handled by backend via cookies
-    // Just redirect to dashboard after a brief delay
-    const timer = setTimeout(() => {
-      window.location.assign('/dashboard');
-    }, 1000);
-
-    return () => clearTimeout(timer);
+  React.useEffect(() => {
+    // Redirect to dashboard after login
+    window.location.assign('/dashboard');
   }, []);
 
   return (
-    <div className="p-6 flex items-center justify-between">
-      <div className="dark:text-neutral-100">Successfully logged in! Redirecting to dashboard...</div>
-      <DarkModeToggle />
+    <div className="min-h-screen flex items-center justify-center bg-background dark:bg-dark-surface-container-lowest">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="w-10 h-10 border-[3px] border-primary-container dark:border-dark-primary-container border-t-transparent rounded-full animate-spin" />
+        <span className="font-sans text-body-md text-on-surface dark:text-dark-on-surface">Login successful!</span>
+        <p className="font-sans text-label-md text-on-surface-variant dark:text-dark-on-surface-variant">Redirecting to dashboard...</p>
+      </div>
     </div>
   );
 };

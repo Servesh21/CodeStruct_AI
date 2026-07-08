@@ -18,11 +18,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   // Show loading while checking authentication
   if (isLoading && user === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950">
+      <div className="min-h-screen flex items-center justify-center bg-background dark:bg-dark-surface-container-lowest">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-neutral-600 dark:text-neutral-400 text-lg">Checking authentication...</span>
-          <p className="text-neutral-500 dark:text-neutral-500 text-sm max-w-md text-center">
+          <div className="w-10 h-10 border-[3px] border-primary-container dark:border-dark-primary-container border-t-transparent rounded-full animate-spin" />
+          <span className="font-sans text-body-md text-on-surface-variant dark:text-dark-on-surface-variant">Checking authentication...</span>
+          <p className="font-sans text-label-md text-outline dark:text-dark-outline max-w-md text-center">
             Verifying your login status
           </p>
         </div>

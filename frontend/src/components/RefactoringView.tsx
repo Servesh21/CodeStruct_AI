@@ -61,8 +61,7 @@ const RefactoringView: React.FC<Props> = ({ issue }) => {
     try {
       const { data } = await api.post(`/issues/${issue.id}/ai-refactor/accept`);
       if (data.success) {
-        alert('✅ Refactoring accepted! You can now include it in a bulk PR operation.');
-        // Could add a callback here to notify parent component
+        alert('Refactoring accepted! You can now include it in a bulk PR operation.');
       } else {
         setError(data.message || 'Failed to accept refactoring');
       }
@@ -78,8 +77,8 @@ const RefactoringView: React.FC<Props> = ({ issue }) => {
     try {
       const { data } = await api.post(`/issues/${issue.id}/ai-refactor/reject`);
       if (data.success) {
-        alert('❌ Refactoring rejected.');
-        setSuggestion(null); // Clear the suggestion
+        alert('Refactoring rejected.');
+        setSuggestion(null);
       } else {
         setError(data.message || 'Failed to reject refactoring');
       }
@@ -90,32 +89,32 @@ const RefactoringView: React.FC<Props> = ({ issue }) => {
     }
   };
 
-  const getVerificationBadgeColor = (badge: string) => {
+  const getVerificationBadgeStyle = (badge: string) => {
     switch (badge) {
-      case 'verified': return 'bg-green-100 text-green-800 border-green-200';
-      case 'warning': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'failed': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'verified': return 'bg-[#3FB950]/15 text-[#3FB950]';
+      case 'warning': return 'bg-[#D29922]/15 text-[#D29922]';
+      case 'failed': return 'bg-[#F85149]/15 text-[#F85149]';
+      default: return 'bg-surface-container-high dark:bg-dark-surface-container-high text-on-surface-variant dark:text-dark-on-surface-variant';
     }
   };
 
   const getVerificationIcon = (badge: string) => {
     switch (badge) {
-      case 'verified': return '✅';
-      case 'warning': return '⚠️';
-      case 'failed': return '❌';
-      default: return '❓';
+      case 'verified': return 'check_circle';
+      case 'warning': return 'warning';
+      case 'failed': return 'cancel';
+      default: return 'help';
     }
   };
 
-  const getLayerIcon = (passed: boolean) => passed ? '✅' : '❌';
+  const getLayerIcon = (passed: boolean) => passed ? 'check_circle' : 'cancel';
 
   return (
-    <div className="border rounded-md p-4 bg-white dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-100 shadow-sm">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="font-semibold">AI Refactoring Suggestion</h3>
+    <div className="border border-outline-variant dark:border-dark-outline-variant rounded-lg p-md bg-surface-container-lowest dark:bg-dark-surface-container">
+      <div className="flex items-center justify-between mb-md">
+        <h3 className="font-heading text-body-lg font-semibold text-on-surface dark:text-dark-on-surface">AI Refactoring Suggestion</h3>
         <button
-          className="px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
+          className="bg-primary-container dark:bg-dark-primary-container text-on-primary dark:text-dark-surface-container-lowest font-mono text-label-md px-3 py-1.5 rounded hover:opacity-90 transition-opacity disabled:opacity-50"
           onClick={handleGenerate}
           disabled={loading}
         >
@@ -123,17 +122,22 @@ const RefactoringView: React.FC<Props> = ({ issue }) => {
         </button>
       </div>
 
-      {error && <div className="text-red-600 mb-2">{error}</div>}
+      {error && (
+        <div className="bg-error-container dark:bg-dark-error-container border border-error dark:border-dark-error rounded-lg p-sm mb-md">
+          <span className="font-sans text-body-md text-on-error-container dark:text-dark-on-error-container">{error}</span>
+        </div>
+      )}
 
       {suggestion && (
-        <div className="space-y-4">
+        <div className="space-y-md">
           {/* Validation Status */}
-          <div className="bg-gray-50 dark:bg-neutral-800 rounded-lg p-3">
+          <div className="bg-surface-container dark:bg-dark-surface-container-high rounded-lg p-md">
             <div className="flex items-center justify-between mb-2">
-              <h4 className="font-medium">RefactoringMirror Validation</h4>
+              <h4 className="font-heading text-body-md font-medium text-on-surface dark:text-dark-on-surface">RefactoringMirror Validation</h4>
               {suggestion.validationResult && (
-                <div className={`px-2 py-1 rounded-full text-xs font-medium border ${getVerificationBadgeColor(suggestion.validationResult.verificationBadge)}`}>
-                  {getVerificationIcon(suggestion.validationResult.verificationBadge)} {suggestion.validationResult.verificationBadge.toUpperCase()}
+                <div className={`px-2 py-0.5 rounded font-mono text-label-md flex items-center gap-1 ${getVerificationBadgeStyle(suggestion.validationResult.verificationBadge)}`}>
+                  <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>{getVerificationIcon(suggestion.validationResult.verificationBadge)}</span>
+                  {suggestion.validationResult.verificationBadge.toUpperCase()}
                 </div>
               )}
             </div>
@@ -141,29 +145,21 @@ const RefactoringView: React.FC<Props> = ({ issue }) => {
             {suggestion.validationResult && (
               <>
                 <div className="mb-2">
-                  <span className="text-sm font-medium">Confidence: </span>
-                  <span className={`text-sm ${suggestion.validationResult.confidence >= 80 ? 'text-green-600' : suggestion.validationResult.confidence >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
+                  <span className="font-mono text-label-md text-on-surface-variant dark:text-dark-on-surface-variant">Confidence: </span>
+                  <span className={`font-mono text-label-md ${suggestion.validationResult.confidence >= 80 ? 'text-[#3FB950]' : suggestion.validationResult.confidence >= 60 ? 'text-[#D29922]' : 'text-[#F85149]'}`}>
                     {suggestion.validationResult.confidence}%
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="flex items-center">
-                    {getLayerIcon(suggestion.validationResult.validationLayers.syntactic.passed)}
-                    <span className="ml-2">Syntactic</span>
-                  </div>
-                  <div className="flex items-center">
-                    {getLayerIcon(suggestion.validationResult.validationLayers.signature.passed)}
-                    <span className="ml-2">Signature</span>
-                  </div>
-                  <div className="flex items-center">
-                    {getLayerIcon(suggestion.validationResult.validationLayers.structural.passed)}
-                    <span className="ml-2">Structural</span>
-                  </div>
-                  <div className="flex items-center">
-                    {getLayerIcon(suggestion.validationResult.validationLayers.behavioral.passed)}
-                    <span className="ml-2">Behavioral</span>
-                  </div>
+                <div className="grid grid-cols-2 gap-xs font-mono text-label-md">
+                  {(['syntactic', 'signature', 'structural', 'behavioral'] as const).map(layer => (
+                    <div key={layer} className="flex items-center gap-2 text-on-surface-variant dark:text-dark-on-surface-variant">
+                      <span className={`material-symbols-outlined text-[14px] ${suggestion.validationResult!.validationLayers[layer].passed ? 'text-[#3FB950]' : 'text-[#F85149]'}`} style={{ fontVariationSettings: "'FILL' 1" }}>
+                        {getLayerIcon(suggestion.validationResult!.validationLayers[layer].passed)}
+                      </span>
+                      <span className="capitalize">{layer}</span>
+                    </div>
+                  ))}
                 </div>
               </>
             )}
@@ -171,27 +167,29 @@ const RefactoringView: React.FC<Props> = ({ issue }) => {
 
           {/* Description */}
           {suggestion.description && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
-              <h4 className="font-medium mb-1">Description</h4>
-              <p className="text-sm text-gray-700 dark:text-gray-300">{suggestion.description}</p>
+            <div className="bg-primary-container/10 dark:bg-dark-primary-container/10 border-l-[3px] border-primary dark:border-dark-primary rounded-r-lg p-md">
+              <h4 className="font-heading text-body-md font-medium text-on-surface dark:text-dark-on-surface mb-1">Description</h4>
+              <p className="font-sans text-body-md text-on-surface-variant dark:text-dark-on-surface-variant">{suggestion.description}</p>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2 mt-4">
+          <div className="flex gap-sm">
             <button
               onClick={() => handleAccept(suggestion.id)}
               disabled={actionLoading !== null}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2 disabled:opacity-50"
+              className="bg-[#3FB950] text-white font-mono text-label-md px-md py-sm rounded hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
             >
-              {actionLoading === 'accept' ? '⏳ Accepting...' : '✅ Accept Refactoring'}
+              <span className="material-symbols-outlined text-[16px]">check</span>
+              {actionLoading === 'accept' ? 'Accepting...' : 'Accept Refactoring'}
             </button>
             <button
               onClick={() => handleReject(suggestion.id)}
               disabled={actionLoading !== null}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center gap-2 disabled:opacity-50"
+              className="bg-[#F85149] text-white font-mono text-label-md px-md py-sm rounded hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
             >
-              {actionLoading === 'reject' ? '⏳ Rejecting...' : '❌ Reject Refactoring'}
+              <span className="material-symbols-outlined text-[16px]">close</span>
+              {actionLoading === 'reject' ? 'Rejecting...' : 'Reject Refactoring'}
             </button>
           </div>
 

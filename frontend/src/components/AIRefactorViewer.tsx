@@ -23,7 +23,6 @@ const AIRefactorViewer: React.FC<AIRefactorViewerProps> = ({
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [activeTab, setActiveTab] = useState<'diff' | 'original' | 'refactored'>('diff');
 
-  // Fetch existing suggestion on mount
   React.useEffect(() => {
     fetchSuggestion();
   }, [issueId]);
@@ -46,14 +45,10 @@ const AIRefactorViewer: React.FC<AIRefactorViewerProps> = ({
   const generateRefactoring = async () => {
     setGenerating(true);
     setError(null);
-    
     const controller = new AbortController();
     setAbortController(controller);
-    
     try {
-      const { data } = await api.post(`/issues/${issueId}/ai-refactor`, {}, {
-        signal: controller.signal
-      });
+      const { data } = await api.post(`/issues/${issueId}/ai-refactor`, {}, { signal: controller.signal });
       if (data.success) {
         setSuggestion(data.data);
       } else {
@@ -101,32 +96,24 @@ const AIRefactorViewer: React.FC<AIRefactorViewerProps> = ({
 
   const renderDiff = () => {
     if (!suggestion) return null;
-
     const originalLines = suggestion.originalCode.split('\n');
     const refactoredLines = suggestion.refactoredCode.split('\n');
-    const maxLines = Math.max(originalLines.length, refactoredLines.length);
 
     return (
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-md">
         {/* Original Code */}
         <div>
-          <div className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2 flex items-center">
-            <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+          <div className="font-mono text-label-md text-on-surface-variant dark:text-dark-on-surface-variant mb-2 flex items-center gap-2">
+            <span className="w-3 h-3 bg-[#F85149] rounded-full" />
             Original Code
           </div>
-          <pre className="text-xs bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-4 overflow-x-auto">
+          <pre className="font-mono text-code-md bg-[#0F1117] rounded-lg p-md overflow-x-auto">
             {originalLines.map((line: string, i: number) => {
               const isChanged = suggestion.changes.some((c: any) => c.lineNumber === i + 1 && c.type !== 'add');
               return (
-                <div
-                  key={i}
-                  className={`${isChanged
-                      ? 'bg-red-100 dark:bg-red-900/40 border-l-2 border-red-500 pl-2'
-                      : ''
-                    }`}
-                >
-                  <span className="text-neutral-400 mr-4 select-none">{i + 1}</span>
-                  <span className="text-neutral-800 dark:text-neutral-200">{line}</span>
+                <div key={i} className={isChanged ? 'bg-[#F85149]/15 border-l-2 border-[#F85149] pl-2' : ''}>
+                  <span className="text-outline-variant dark:text-dark-outline-variant mr-4 select-none">{i + 1}</span>
+                  <span className="text-surface-dim">{line}</span>
                 </div>
               );
             })}
@@ -135,28 +122,19 @@ const AIRefactorViewer: React.FC<AIRefactorViewerProps> = ({
 
         {/* Refactored Code */}
         <div>
-          <div className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2 flex items-center">
-            <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+          <div className="font-mono text-label-md text-on-surface-variant dark:text-dark-on-surface-variant mb-2 flex items-center gap-2">
+            <span className="w-3 h-3 bg-[#3FB950] rounded-full" />
             Refactored Code
           </div>
-          <pre className="text-xs bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded p-4 overflow-x-auto">
+          <pre className="font-mono text-code-md bg-[#0F1117] rounded-lg p-md overflow-x-auto">
             {refactoredLines.map((line: string, i: number) => {
               const change = suggestion.changes.find((c: any) => c.lineNumber === i + 1);
               const isChanged = !!change;
               const isAdded = change?.type === 'add';
-
               return (
-                <div
-                  key={i}
-                  className={`${isAdded
-                      ? 'bg-green-100 dark:bg-green-900/40 border-l-2 border-green-500 pl-2'
-                      : isChanged
-                        ? 'bg-yellow-100 dark:bg-yellow-900/40 border-l-2 border-yellow-500 pl-2'
-                        : ''
-                    }`}
-                >
-                  <span className="text-neutral-400 mr-4 select-none">{i + 1}</span>
-                  <span className="text-neutral-800 dark:text-neutral-200">{line}</span>
+                <div key={i} className={isAdded ? 'bg-[#3FB950]/15 border-l-2 border-[#3FB950] pl-2' : isChanged ? 'bg-[#D29922]/15 border-l-2 border-[#D29922] pl-2' : ''}>
+                  <span className="text-outline-variant dark:text-dark-outline-variant mr-4 select-none">{i + 1}</span>
+                  <span className="text-surface-dim">{line}</span>
                 </div>
               );
             })}
@@ -167,144 +145,123 @@ const AIRefactorViewer: React.FC<AIRefactorViewerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-on-surface/40 dark:bg-dark-surface-container-lowest/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-surface dark:bg-dark-surface-container border border-outline-variant dark:border-dark-outline-variant rounded-xl max-w-7xl w-full max-h-[90vh] overflow-hidden flex flex-col animate-scale-in">
         {/* Header */}
-        <div className="p-6 border-b dark:border-neutral-700">
+        <div className="p-lg border-b border-outline-variant dark:border-dark-outline-variant">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-                🤖 AI-Powered Refactoring
+              <h2 className="font-heading text-headline-md text-on-surface dark:text-dark-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary dark:text-dark-primary">auto_fix_high</span>
+                AI-Powered Refactoring
               </h2>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+              <p className="font-sans text-body-md text-on-surface-variant dark:text-dark-on-surface-variant mt-1">
                 Issue Type: <span className="font-semibold">{issueType}</span>
               </p>
             </div>
-            <button
-              onClick={onClose}
-              className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+            <button onClick={onClose} className="text-on-surface-variant dark:text-dark-on-surface-variant hover:text-on-surface dark:hover:text-dark-on-surface p-2 hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high rounded-lg transition-colors">
+              <span className="material-symbols-outlined">close</span>
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-lg">
           {loading && (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-neutral-600 dark:text-neutral-400">Loading suggestion...</span>
+              <div className="w-10 h-10 border-[3px] border-primary-container dark:border-dark-primary-container border-t-transparent rounded-full animate-spin" />
+              <span className="ml-3 font-sans text-body-md text-on-surface-variant dark:text-dark-on-surface-variant">Loading suggestion...</span>
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
-              <p className="text-red-800 dark:text-red-300">{error}</p>
+            <div className="bg-error-container dark:bg-dark-error-container border border-error dark:border-dark-error rounded-lg p-md mb-md">
+              <p className="font-sans text-body-md text-on-error-container dark:text-dark-on-error-container">{error}</p>
             </div>
           )}
 
           {!loading && !suggestion && !generating && (
             <div className="text-center py-12">
-              <div className="text-6xl mb-4">🤖</div>
-              <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-                No AI Suggestion Yet
-              </h3>
-              <p className="text-neutral-600 dark:text-neutral-400 mb-6">
-                Generate an AI-powered refactoring suggestion for this code issue
-              </p>
+              <span className="material-symbols-outlined text-[48px] text-outline dark:text-dark-outline mb-4 block">auto_fix_high</span>
+              <h3 className="font-heading text-headline-md text-on-surface dark:text-dark-on-surface mb-2">No AI Suggestion Yet</h3>
+              <p className="font-sans text-body-md text-on-surface-variant dark:text-dark-on-surface-variant mb-6">Generate an AI-powered refactoring suggestion for this code issue</p>
               <button
                 onClick={generateRefactoring}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                className="bg-primary-container dark:bg-dark-primary-container text-on-primary dark:text-dark-surface-container-lowest font-mono text-label-md px-6 py-3 rounded hover:opacity-90 transition-opacity inline-flex items-center gap-2"
               >
-                ✨ Generate AI Refactoring
+                <span className="material-symbols-outlined text-[18px]">bolt</span>
+                Generate AI Refactoring
               </button>
             </div>
           )}
 
           {generating && (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-                🧠 AI is Thinking...
-              </h3>
-              <p className="text-neutral-600 dark:text-neutral-400 mb-6">
-                Analyzing your code and generating refactoring suggestions
-              </p>
-              
-              {/* Stop Generation Button */}
+              <div className="w-14 h-14 border-[3px] border-primary-container dark:border-dark-primary-container border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <h3 className="font-heading text-headline-md text-on-surface dark:text-dark-on-surface mb-2">AI is Thinking...</h3>
+              <p className="font-sans text-body-md text-on-surface-variant dark:text-dark-on-surface-variant mb-6">Analyzing your code and generating refactoring suggestions</p>
               <button
                 onClick={stopGeneration}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 mx-auto transition-colors"
+                className="bg-error dark:bg-dark-error text-on-error dark:text-dark-surface-container-lowest font-mono text-label-md px-md py-sm rounded hover:opacity-90 transition-opacity inline-flex items-center gap-2"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <rect x="6" y="6" width="12" height="12" rx="1" />
-                </svg>
+                <span className="material-symbols-outlined text-[18px]">stop</span>
                 Stop Generation
               </button>
             </div>
           )}
 
           {suggestion && (
-            <div className="space-y-6">
+            <div className="space-y-lg">
               {/* Explanation */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <div className="flex items-start">
-                  <div className="text-2xl mr-3">💡</div>
+              <div className="bg-primary-container/10 dark:bg-dark-primary-container/10 border-l-[3px] border-primary dark:border-dark-primary rounded-r-lg p-md">
+                <div className="flex items-start gap-3">
+                  <span className="material-symbols-outlined text-primary dark:text-dark-primary">lightbulb</span>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
-                      AI Explanation
-                    </h3>
-                    <p className="text-blue-800 dark:text-blue-200">{suggestion.explanation}</p>
-                    <div className="mt-3 flex items-center gap-4 text-sm">
-                      <span className="text-blue-700 dark:text-blue-300">
-                        Confidence: <strong>{suggestion.confidence}%</strong>
-                      </span>
-                      <span className="text-blue-700 dark:text-blue-300">
-                        Changes: <strong>{suggestion.changes.length} lines</strong>
-                      </span>
+                    <h3 className="font-heading text-body-lg font-semibold text-on-surface dark:text-dark-on-surface mb-2">AI Explanation</h3>
+                    <p className="font-sans text-body-md text-on-surface-variant dark:text-dark-on-surface-variant">{suggestion.explanation}</p>
+                    <div className="mt-3 flex items-center gap-lg font-mono text-label-md text-on-surface-variant dark:text-dark-on-surface-variant">
+                      <span>Confidence: <strong className="text-on-surface dark:text-dark-on-surface">{suggestion.confidence}%</strong></span>
+                      <span>Changes: <strong className="text-on-surface dark:text-dark-on-surface">{suggestion.changes.length} lines</strong></span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Tab Navigation */}
-              <div className="border-b dark:border-neutral-700">
-                <nav className="flex space-x-8">
+              <div className="border-b border-outline-variant dark:border-dark-outline-variant">
+                <nav className="flex gap-lg">
                   {[
-                    { id: 'diff', label: 'Side-by-Side Diff', icon: '🔄' },
-                    { id: 'original', label: 'Original Code', icon: '📄' },
-                    { id: 'refactored', label: 'Refactored Code', icon: '✨' },
+                    { id: 'diff', label: 'Side-by-Side Diff', icon: 'compare_arrows' },
+                    { id: 'original', label: 'Original Code', icon: 'code' },
+                    { id: 'refactored', label: 'Refactored Code', icon: 'auto_fix_high' },
                   ].map((tab) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as any)}
-                      className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
-                          ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                          : 'border-transparent text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300'
-                        }`}
+                      className={`py-2 px-1 border-b-2 font-mono text-label-md transition-colors flex items-center gap-1 ${
+                        activeTab === tab.id
+                          ? 'border-primary dark:border-dark-primary text-primary dark:text-dark-primary'
+                          : 'border-transparent text-on-surface-variant dark:text-dark-on-surface-variant hover:text-on-surface dark:hover:text-dark-on-surface'
+                      }`}
                     >
-                      {tab.icon} {tab.label}
+                      <span className="material-symbols-outlined text-[16px]">{tab.icon}</span>
+                      {tab.label}
                     </button>
                   ))}
                 </nav>
               </div>
 
               {/* Code Display */}
-              <div className="mt-4">
+              <div className="mt-md">
                 {activeTab === 'diff' && renderDiff()}
-
                 {activeTab === 'original' && (
-                  <pre className="text-xs bg-neutral-50 dark:bg-neutral-900 border dark:border-neutral-700 rounded p-4 overflow-x-auto">
-                    <code className="text-neutral-800 dark:text-neutral-200">{suggestion.originalCode}</code>
+                  <pre className="font-mono text-code-md bg-[#0F1117] rounded-lg p-md overflow-x-auto">
+                    <code className="text-surface-dim">{suggestion.originalCode}</code>
                   </pre>
                 )}
-
                 {activeTab === 'refactored' && (
-                  <pre className="text-xs bg-neutral-50 dark:bg-neutral-900 border dark:border-neutral-700 rounded p-4 overflow-x-auto">
-                    <code className="text-neutral-800 dark:text-neutral-200">{suggestion.refactoredCode}</code>
+                  <pre className="font-mono text-code-md bg-[#0F1117] rounded-lg p-md overflow-x-auto">
+                    <code className="text-surface-dim">{suggestion.refactoredCode}</code>
                   </pre>
                 )}
               </div>
@@ -314,27 +271,27 @@ const AIRefactorViewer: React.FC<AIRefactorViewerProps> = ({
 
         {/* Footer Actions */}
         {suggestion && (
-          <div className="p-6 border-t dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900/50">
+          <div className="p-lg border-t border-outline-variant dark:border-dark-outline-variant bg-surface-container dark:bg-dark-surface-container-high">
             <div className="flex items-center justify-between">
               <button
                 onClick={handleReject}
-                className="px-6 py-2 border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                className="font-mono text-label-md px-6 py-2 border border-outline-variant dark:border-dark-outline-variant text-on-surface-variant dark:text-dark-on-surface-variant rounded hover:bg-surface-container-high dark:hover:bg-dark-surface-container-highest transition-colors"
               >
-                ❌ Reject
+                Reject
               </button>
-              <div className="flex gap-3">
+              <div className="flex gap-sm">
                 <button
                   onClick={generateRefactoring}
                   disabled={generating}
-                  className="px-6 py-2 border border-blue-600 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors disabled:opacity-50"
+                  className="font-mono text-label-md px-6 py-2 border border-primary dark:border-dark-primary text-primary dark:text-dark-primary rounded hover:bg-primary-container/10 dark:hover:bg-dark-primary-container/10 transition-colors disabled:opacity-50"
                 >
-                  🔄 Regenerate
+                  Regenerate
                 </button>
                 <button
                   onClick={handleAccept}
-                  className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                  className="bg-[#3FB950] text-white font-mono text-label-md px-6 py-2 rounded hover:opacity-90 transition-opacity"
                 >
-                  ✅ Accept & Apply
+                  Accept & Apply
                 </button>
               </div>
             </div>

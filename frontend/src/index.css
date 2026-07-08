@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,39 +7,167 @@
 @layer base {
   :root {
     color-scheme: light dark;
-    --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-    --gradient-accent: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
-    --gradient-success: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
   }
 
   * {
-    @apply border-neutral-200 dark:border-neutral-800;
+    border-color: #c3c6d7; /* outline-variant */
+  }
+
+  .dark * {
+    border-color: #414752; /* dark outline-variant */
   }
 
   body {
-    @apply bg-gradient-to-br from-neutral-50 via-primary-50/20 to-neutral-50;
-    @apply dark:from-neutral-950 dark:via-primary-950/20 dark:to-neutral-950;
-    @apply text-neutral-900 dark:text-neutral-100;
-    @apply font-sans antialiased;
-    @apply transition-colors duration-300;
+    background-color: #F7F8FA;
+    color: #151c27;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
-  /* Smooth scrolling */
+  .dark body {
+    background-color: #0b0e14;
+    color: #e0e2ea;
+  }
+
   html {
-    @apply scroll-smooth;
+    scroll-behavior: smooth;
   }
 
   /* Code blocks */
   code {
-    @apply font-mono text-sm bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 20px;
+    background-color: #f1f3f5;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .dark code {
+    background-color: #272a30;
   }
 
   pre code {
-    @apply bg-transparent p-0;
+    background: transparent;
+    padding: 0;
   }
 
   /* Selection */
   ::selection {
-    @apply bg-primary-500/30 text-primary-900;
+    background-color: rgba(37, 99, 235, 0.2);
+    color: #00174b;
   }
+
+  .dark ::selection {
+    background-color: rgba(88, 166, 255, 0.25);
+    color: #d3e4ff;
+  }
+}
+
+@layer components {
+  /* Hero dot-grid pattern */
+  .hero-pattern {
+    background-image: radial-gradient(#c3c6d7 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .dark .hero-pattern {
+    background-image: radial-gradient(#414752 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Glass panel for hero mockup */
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid #E3E6EA;
+  }
+
+  .dark .glass-panel {
+    background: rgba(28, 32, 37, 0.8);
+    border-color: #414752;
+  }
+
+  /* Input focus glow */
+  .input-glow:focus-within {
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    border-color: #2563eb;
+  }
+
+  .dark .input-glow:focus-within {
+    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.15);
+    border-color: #58a6ff;
+  }
+
+  /* Hover reveal pattern for repo rows */
+  .repo-row .hover-action {
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: all 200ms ease;
+  }
+  .repo-row:hover .hover-action {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .repo-row:hover .updated-text {
+    display: none;
+  }
+
+  /* Progress bar fill */
+  .progress-bar-fill {
+    transition: width 0.3s ease-in-out;
+  }
+
+  /* Code block container */
+  .code-block {
+    background-color: #0F1117;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  /* Active nav indicator */
+  .nav-active {
+    border-left: 3px solid #2563eb;
+    background-color: rgba(37, 99, 235, 0.06);
+    color: #004ac6;
+    font-weight: 600;
+  }
+
+  .dark .nav-active {
+    border-left-color: #58a6ff;
+    background-color: rgba(88, 166, 255, 0.08);
+    color: #a2c9ff;
+  }
+}
+
+@layer utilities {
+  /* Safe area padding for mobile */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+}
+
+/* Custom scrollbar — thin, matching design system */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #dce2f3;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c3c6d7;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #32353b;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #414752;
 }
